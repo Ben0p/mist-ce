@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches:
+     - master
+  # pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & push Docker image
+    runs-on: ubuntu-latest
+    env:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "mistcommunity-bot" --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker pull mist/python3
+          docker build --rm -t ghcr.io/${GITHUB_REPOSITORY_OWNER##*/}/mist-api-v2:${GITHUB_SHA} \
+            --build-arg API_VERSION_SHA=${{ github.sha }} \
+            --build-arg API_VERSION_NAME=${{ github.ref_name }} .
+          docker push ghcr.io/${GITHUB_REPOSITORY_OWNER##*/}/mist-api-v2:${GITHUB_SHA}
+          docker tag ghcr.io/${GITHUB_REPOSITORY_OWNER##*/}/mist-api-v2:${GITHUB_SHA} ghcr.io/${GITHUB_REPOSITORY_OWNER##*/}/mist-api-v2:latest
+          docker push ghcr.io/${GITHUB_REPOSITORY_OWNER##*/}/mist-api-v2:latest
+
+  # flake8:
+  #   name: Lint with flake8
+  #   runs-on: ubuntu-latest
+  #   # no code checkout → use the image’s baked-in copy
+  #   env:
+  #     GIT_STRATEGY: none
+  #   container:
+  #     image: registry.ops.mist.io/mistio/mist-api-v2:${{ github.sha }}
+  #     credentials:
+  #       username: ${{ secrets.CI_REGISTRY_USER }}
+  #       password: ${{ secrets.CI_REGISTRY_PASSWORD }}
+  #   defaults:
+  #     run:
+  #       working-directory: /usr/src/app
+  #   steps:
+  #     - name: Run flake8
+  #       run: flake8 --ignore=E402,E722,F632,F841,W504,W605 mist_api_v2/controllers
+
+  # uniq:
+  #   name: Fail on duplicate migrations
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: ghcr.io/${GITHUB_REPOSITORY_OWNER##*/}/mist-api-v2:latest
+  #   defaults:
+  #     run:
+  #       working-directory: /usr/src/app
+  #   steps:
+  #     - name: Check for duplicate migration filenames
+  #       run: |
+  #         ls migrations/ | uniq -c -d -w 4 | grep . && exit 1 || exit 0

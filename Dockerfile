@@ -1,4 +1,4 @@
-FROM mist/api:master
+FROM ghcr.io/mistcommunity/mist:latest
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
