@@ -35,7 +35,7 @@ class Template(OwnershipMixin, me.Document, TagMixin):
     entrypoint = me.StringField()  # used for url (if archive) and repos
     created = me.DateTimeField(default=datetime.utcnow)
     last_used_at = me.DateTimeField()
-    versions = me.ListField(me.StringField) # git sha's
+    versions = me.ListField(me.StringField()) # git sha's
     workflows = MistListField()
     inputs = MistListField()
     deleted = me.DateTimeField()
