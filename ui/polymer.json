@@ -1,0 +1,51 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/mist-app.js",
+  "fragments": [
+    "src/page-machines.js",
+    "src/page-images.js",
+    "src/page-keys.js",
+    "src/page-networks.js",
+    "src/page-zones.js",
+    "src/page-tunnels.js",
+    "src/page-scripts.js",
+    "src/page-templates.js",
+    "src/page-stacks.js",
+    "src/page-schedules.js",
+    "src/page-teams.js",
+    "src/page-incidents.js",
+    "src/page-my-account.js",
+    "src/page-clouds.js",
+    "src/page-members.js",
+    "src/page-insights.js",
+    "src/page-not-found.js",
+    "src/helpers/card-form.js",
+    "src/app-form/app-form.js",
+    "src/element-for-in/element-for-in.js"
+  ],
+  "sources": [
+    "src/**/*",
+    "data/**/*",
+    "images/**/*"
+  ],
+  "extraDependencies": [
+  ],
+  "builds": [{
+    "name": "bundled",
+    "bundle": {
+      "excludes": ["bower_components/jsoneditor/*","bower_components/jsoneditor/*/*","bower_components/juicy-jsoneditor/juicy-jsoneditor.js","bower_components/fast-json-patch/dist/fast-json-patch.min.js","bower_components/echarts/dist/echarts.min.js", "bower_components/echarts/dist/echarts.common.min.js", "bower_components/mist-insights/echarts-import.js", "bower_components/polyana-dashboard/echarts-import.js", "bower_components/json-viewer/*", "bower_components/json-viewer/*/*", "bower_components/xml-viewer/*", "bower_components/xml-viewer/*/*"],
+      "sourcemaps": true
+    },
+    "js": {"minify": true},
+    "css": {"minify": true},
+    "html": {"minify": true}
+  }],
+  "autoBasePath": true,
+  "moduleResolution": "node",
+  "npm": true,
+  "lint": {
+    "rules": [
+      "polymer-3"
+    ]
+  }
+}
