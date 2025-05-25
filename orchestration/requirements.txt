@@ -1,0 +1,2 @@
+https://github.com/mistio/cloudify-dsl-parser/archive/master.tar.gz
+networkx

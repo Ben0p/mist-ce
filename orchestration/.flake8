@@ -1,0 +1,17 @@
+[flake8]
+show-source = True
+statistics = True
+count = True
+ignore =
+    E722,  # bare except
+exclude =
+    # Automatically created directories we don't want to test.
+    .git/,
+    __pycache__/,
+    env/,
+
+    # Code files that need pep8 fixes.
+        ./mist/orchestration/__init__.py,
+        ./mist/orchestration/methods.py,
+        ./mist/orchestration/models.py,
+        ./mist/orchestration/views.py,
