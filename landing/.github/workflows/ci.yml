@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  # pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-landing:
+    name: Build Landing Image
+    runs-on: ubuntu-latest
+    env:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build Landing image
+        run: |
+          docker build --rm -t "ghcr.io/${GITHUB_REPOSITORY_OWNER##*/}/landing:${GITHUB_SHA}" .
+          docker push "ghcr.io/${GITHUB_REPOSITORY_OWNER##*/}/landing:${GITHUB_SHA}"
