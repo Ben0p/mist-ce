@@ -1,6 +1,3 @@
-[submodule "ui"]
-	path = ui
-	url = ../mist.ui.git
 [submodule "docker/nginx/static/novnc"]
 	path = docker/nginx/static/novnc
 	url = https://github.com/novnc/noVNC.git
