@@ -1,0 +1,20 @@
+[flake8]
+show-source = True
+statistics = True
+count = True
+ignore =
+    E722,  # bare except
+exclude =
+
+    # Automatically created directories we don't want to test.
+    .git/,
+    __pycache__/,
+    env/,
+
+    # Local settings files.
+    settings.py,
+
+    # Submodules we don't want to test.
+    ./lc/,
+    ./paramiko/,
+    ./run_script/,

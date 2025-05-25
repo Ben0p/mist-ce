@@ -1,0 +1,65 @@
+## This are mist.io dependencies with loose version restrictions.
+## Keeping this file helps discover what the actual dependencies are and
+## assists in the process of upgrading them. Occasionally we build using this
+## requirements file, test everything exhaustively, and then store the output
+## of `pip freeze` to requirements-frozen.txt. Using frozen/pinned requirements
+## ensures that the build won't break because of a new release of some
+## dependency.
+
+amqp
+apscheduler
+asgiref
+beautifulsoup4
+boto3
+dnspython
+dateparser
+dramatiq
+elasticsearch[async]==7.10.1
+flake8
+future
+gevent
+greenlet
+hvac
+ipaddress # requests needs this for dns matching
+ipython
+iso8601
+jsonpatch
+jsonpickle
+kombu==5.4.2
+mongoengine
+mongomock
+names
+netaddr
+
+# Make sure that this matches to paramiko version used by libcloud
+paramiko==3.4.1
+
+parse
+passlib
+pastedeploy  # Required for uwsgi paste logging, can probably be removed.
+pastescript  # Required for uwsgi paste logging, can probably be removed.
+pika
+pingparsing
+pretty
+pycryptodome
+pymongo
+pyyaml
+pyramid
+pyramid_chameleon
+pytest
+python3-openid
+pyvmomi
+redis
+requests
+rstream
+s3cmd
+scp
+sendgrid-python
+sentry-dramatiq
+sentry-sdk
+sockjs-tornado
+tornado
+troposphere
+#tornado_profile
+uwsgidecorators
+websocket-client
