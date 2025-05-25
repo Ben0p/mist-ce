@@ -1,3 +1,6 @@
 [submodule "docker/nginx/static/novnc"]
 	path = docker/nginx/static/novnc
 	url = https://github.com/novnc/noVNC.git
+[submodule "api/lc"]
+	path = api/lc
+	url = https://github.com/apache/libcloud.git
