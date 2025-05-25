@@ -1,0 +1,16 @@
+behave
+behaving
+cryptography
+pymongo
+pytest
+pytest-order
+python-jose
+PyYAML
+requests
+selenium
+flake8
+ipdb
+ipython
+hvac
+pillow
+py
