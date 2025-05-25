@@ -16,3 +16,4 @@ keys
 /docker/vault/file/sys/
 /docker/vault/file/logical/
 /docker/vault/file/core/
+.env

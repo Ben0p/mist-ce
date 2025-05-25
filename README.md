@@ -1,5 +1,4 @@
 # Mist Cloud Management Platform - Community Edition
-
 > [!NOTE]  
 > In December 2023, Mist.io Inc was [acquired by Dell Technologies](https://mist.io/blog/2023-12-18-mist-joins-dell-isg-edge). Since then, the Enterprise Edition (EE) and Hosted Service (HS) are no longer available, while the Community Edition (CE) has not been maintained besides some security fixes contributed by the community.
 
@@ -11,7 +10,6 @@ From the post, they talk about how the sale impacted Mist Community Edition:
 This project, [mistcommunity/mist-ce](https://github.com/mistcommunity/mist-ce), aims to update the code so that Mist Community Edition works agian, and is usable as an open source software. To see the status look at the [issues](https://github.com/mistcommunity/mist-ce/issues) page, or to try and spin it up, or help debug issues to get it working agian, see the [Development](https://github.com/mistcommunity/mist-ce?tab=readme-ov-file#development) section.
 
 ## Overview
-
 Mist simplifies multicloud management. It offers a unified interface from where you can manage public clouds, private clouds, hypervisors, containers and bare metal servers.
 
 With Mist you can perform common management tasks like provisioning, orchestration, monitoring, automation and cost analysis.
@@ -26,15 +24,12 @@ Mist Community Edition (CE) is licensed under the Apache License v2. It is ideal
 > While the original [mist.io](https://mist.io/) site exists, we have no access to it, and it is not part of this project.
  
 ## Documentation
-
 After the sale to Dell the offical documention site [docs.mist.io](https://docs.mist.io) disappeared, so the latest documentation we have is available on the Internet Archive's Wayback Machine: [docs.mist.io](https://web.archive.org/web/20231002042043/https://docs.mist.io/) (last updated October 2, 2023)
 
-## Developement
-
+## Development
 The initial goal is to bring up [mistcommunity/mist-ce](https://github.com/mistcommunity/mist-ce) on Linux in Docker utilizing Docker Compose. This should work anywhere you can run Docker, but while we're fixing old, outstanding issues just to make it working project again, the focus is on Docker running on Linux. To bring up the stack, follow the steps below.
 
 ### Install requirements
-
 Install the following software on your system and ensure everything is working correctly (ie- running `docker ps` as your $USER works, the `docker compose` command works and `git` is in your path)
 
 * [Docker](https://docs.docker.com/engine/install/)
@@ -45,23 +40,43 @@ Install the following software on your system and ensure everything is working c
 > For testing I'm using Debian (Bookworm 12 (stable)), Docker (version 28.1.1, build 4eba377) and Docker Compose (version v2.35.1)
 
 ### Checkout the code
-
 ```shell
-git clone https://github.com/mistcommunity/mist-ce.git
+git clone --recursive https://github.com/mistcommunity/mist-ce.git
 cd mist-ce
 ```
 
-### Start the project
+### Prepare for local builds
+Copy file `.env.template` to name `.env` and update your GitHub username to it.
 
+
+### Build and start the project
 ```shell
-docker compose up -d
+docker compose build
+docker compose up -d --wait
 ```
 
-| [!NOTE]
-| This will download all the Docker images and start them, this took about 3 minutes, and used over 12 Gigs of disk space
+> [!NOTE]
+> This will build all the Docker images and start them and it can take some time depending on performance of your computer. It is also expected that it will use quite a lot of disk space and RAM.
+
+### Building the UI
+Install all front-end dependencies with the following commands:
+```shell
+docker-compose exec landing npm install
+docker-compose exec ui npm install
+```
+
+And then build the landing & UI bundles with:
+```shell
+docker-compose exec landing npm run build
+docker-compose exec ui npm run build
+```
+
+### Add admin user
+```shell
+docker-compose exec api sh -c './bin/adduser --admin admin@example.com'
+```
 
 ### View docker logs
-
 To check on the progress and look for errors, tail the docker compose logs
 
 ```shell
@@ -69,11 +84,9 @@ docker compose logs -f
 ```
 
 ### Attach 
-
 If all looks good, try to login via a web browser, which should be available via http (port 80) on the IP of the host you're running on.
 
 ## Questions, feedback
-
 For feedback, open an [issue](https://github.com/mistcommunity/mist-ce/issues)
 
 > [!CAUTION]
