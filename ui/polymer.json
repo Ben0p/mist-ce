@@ -19,6 +19,7 @@
     "src/page-members.js",
     "src/page-insights.js",
     "src/page-not-found.js",
+    "src/page-sign-in.js",
     "src/helpers/card-form.js",
     "src/app-form/app-form.js",
     "src/element-for-in/element-for-in.js"

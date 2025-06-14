@@ -59,6 +59,8 @@ services:
     build: ./ui
     volumes:
       - ./ui:/ui:rw
+    ports:
+      - 8000
 
   landing:
     build: ./landing
