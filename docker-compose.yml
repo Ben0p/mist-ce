@@ -152,7 +152,6 @@ services:
     depends_on:
       - api
       - sockjs
-      - landing
       - ui
 
   vminsert:
