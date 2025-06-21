@@ -59,12 +59,12 @@
                 }
             } catch (error) {
                 console.error('Error checking authentication status:', error);
-                // Load landing-app.js if not authenticated
-                const { default: LandingApp } = await import('./src/auth/landing-app.js');
-                document.getElementById('app-container').innerHTML = '<landing-app unresolved></landing-app>';
+                // Load auth-app.js if not authenticated
+                const { default: AuthApp } = await import('./src/auth/auth-app.js');
+                document.getElementById('app-container').innerHTML = '<auth-app unresolved></auth-app>';
 
-                document.querySelector('landing-app').csrfToken = CSRF_TOKEN;
-                document.querySelector('landing-app').config = CONFIG;
+                document.querySelector('auth-app').csrfToken = CSRF_TOKEN;
+                document.querySelector('auth-app').config = CONFIG;
             }
         }
 

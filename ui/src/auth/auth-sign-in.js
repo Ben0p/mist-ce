@@ -10,8 +10,11 @@ import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/iron-icons/social-icons.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
+
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
+
 
 Polymer({
   _template: html`
@@ -48,7 +51,7 @@ Polymer({
         text-align: center;
         height: 46px;
         display: block;
-        width: 300px;
+        width: 305px;
         padding-left: 4px;
       }
 
@@ -57,6 +60,10 @@ Polymer({
         background-color: #fff;
         float: left;
         margin-top: -7px;
+      }
+
+      .textBtn {
+        padding-left: 7px;
       }
 
       paper-button > span {
@@ -83,40 +90,34 @@ Polymer({
         color: #424242;
       }
 
-      div.output {
-        color: var(--form-output-color);
-        text-align: left;
-        white-space: pre-wrap;
-        margin-top: 16px;
+      paper-button.white.ldap-selected.true:not([disabled]) {
+        background-color: transparent;
+        box-shadow: 0 0 0 0 transparent;
+        background-color: transparent;
+        padding-left: 0;
+        margin: 0 0 0 -3px;
       }
 
-      a#setPasswordLink {
+      paper-button > span > iron-icon.users {
+        color: #444;
+        background-color: transparent;
+        padding: 7px 2px 7px 12px;
         float: left;
+        margin-top: -5px;
       }
 
-      a#setPasswordLink {
-      }
-
-      #placeholder {
-        opacity: 0;
-        background-color: grey;
-        @apply (--layout-fit);
-        z-index: -1;
+      div.output {
+        text-align: center;
       }
 
       paper-material {
         background-color: var(--form-background);
         display: block;
         padding: 8px 32px 32px;
-        box-shadow: var(--form-box-shadow);
+        @apply (--form-elevation);
         width: 300px;
         margin: 0 auto;
-      }
-
-      div.set-password {
-        text-align: center;
-        padding: 32px;
-        font-size: 15px;
+        box-shadow: var(--form-box-shadow);
       }
 
       div.logo-solo {
@@ -142,6 +143,16 @@ Polymer({
         color: #888;
         display: block;
       }
+      .error {
+        color: #d96557;
+      }
+      .success {
+        color: #69b46c;
+      }
+      .forbidden-error {
+        font-size: 0.9em;
+        margin-bottom: 24px;
+      }
       paper-button#logo {
         background-image: var(--vertical-logo);
         background-color: transparent !important;
@@ -154,109 +165,149 @@ Polymer({
       }
     </style>
 
-    <div id="placeholder"></div>
     <div id="container">
+
       <div class="logo-solo">
         <a href="/"><paper-button id="logo" on-tap="_logoClicked"></paper-button></a>
       </div>
 
-      <h1 id="pageTitle">Set your password</h1>
-      <iron-form id="setPasswordForm">
+      <iron-form id="signInForm">
         <paper-material elevation="1">
-          <form method="post" action="/set-password" enctype="application/json" id="form">
-            <mist-password
-              autofocus=""
+          <form
+            method="post"
+            action="/login"
+            enctype="application/json"
+            id="form"
+          >
+            <paper-input
+              name="email"
+              id="signin-email"
+              label="Email"
+              auto-validate
+              autofocus
+              type="email"
+              on-focus="_autoSelect"
+            >
+            </paper-input>
+
+            <paper-input
               name="password"
-              value="{{password}}"
-              strength="{{strength}}"
-            ></mist-password>
-            <input type="hidden" name="password" value="[[password]]" />
-            <input type="hidden" name="key" value="[[route.__queryParams.key]]" />
+              id="signin-password"
+              label="Password"
+              type="password"
+              required=""
+              auto-validate=""
+              on-focus="_autoSelect"
+            ></paper-input>
+
             <paper-button
               raised=""
               on-tap="_submitButtonHandler"
               disabled=""
-              id="setPasswordSubmit"
+              id="signInSubmit"
             >
               <paper-spinner
                 id="spinner"
                 hidden$="[[!loading]]"
                 active="[[loading]]"
               ></paper-spinner>
-              <div hidden$="[[loading]]">Enter</div>
+              <div class="output" hidden$="[[loading]]">
+                Sign in
+              </div>
             </paper-button>
+
           </form>
-          <div class="output"></div>
         </paper-material>
       </iron-form>
+
     </div>
   `,
 
-  is: 'landing-set-password',
+  is: 'auth-sign-in',
 
   properties: {
     loading: {
       type: Boolean,
       value: false,
     },
-    invitoken: String,
-
     csrfToken: {
       type: String,
       value: '',
     },
   },
 
-  observers: ['_invitokenExists(invitoken)'],
-
   attached() {
     const that = this;
-    const validate = () => {
-      // Validate the entire form to see if we should enable the `Submit` button.
-      const ret = that.$.setPasswordForm.validate();
-      that.$.setPasswordSubmit.disabled = !ret;
+
+    const validate = event => {
+      const ret = that.$.signInForm.validate();
+      that.$.signInSubmit.disabled = !ret;
+      const outputDiv = that.$.signInForm.querySelector('.output');
+
+      if (!that.loading && outputDiv && outputDiv.innerHTML !== 'Sign in') {
+        outputDiv.innerHTML = 'Sign in';
+      }
       return ret;
     };
-    this.$.setPasswordForm.addEventListener('keyup', event => {
-      const submitDisabled = that.$.setPasswordSubmit.disabled;
-      that.$.setPasswordForm.querySelector('paper-button > div').innerHTML = 'Enter';
-      if (validate(event) && !submitDisabled && event.key === 'Enter') that._submitButtonHandler();
-    });
-    this.$.setPasswordForm.addEventListener('change', validate);
 
-    this.$.setPasswordForm.addEventListener('iron-form-error', event => {
-      console.warn('ERROR!', event.detail);
-      that.loading = false;
-      that.$.setPasswordSubmit.querySelector('div').innerText = event.detail.request.statusText;
-    });
-    this.$.setPasswordForm.addEventListener('iron-form-response', () => {
-      that.loading = false;
-      that.$.setPasswordSubmit.querySelector('div').innerText = 'SUCCESS';
-      window.location = '/';
-    });
-    this.$.setPasswordForm.addEventListener('iron-form-presubmit', () => {
-      that.$.setPasswordForm.headers['Csrf-Token'] = this.csrfToken;
-    });
-  },
+    this.$.signInForm.addEventListener('change', validate);
 
-  _invitokenExists(tok) {
-    if (tok) {
-      const element = document.createElement('input');
-      element.type = 'hidden';
-      element.name = 'invitoken';
-      element.value = this.invitoken;
-      this.$.form.appendChild(element);
-    }
+    this.$.signInForm.addEventListener('keyup', event => {
+      const submitDisabled = that.$.signInSubmit.disabled;
+      if (validate(event) && !submitDisabled && event.key === 'Enter') {
+        that._submitButtonHandler()
+      };
+    });
+
+    this.$.signInForm.addEventListener('iron-form-error', event => {
+      that.loading = false;
+      let statusCode = event.detail.request.xhr.status
+      let errorMsg = event.detail.error;
+      let msg = ''
+
+      switch(statusCode) {
+        case 400:
+          msg = 'Bad Request';
+          break;
+        case 401:
+          msg = 'Unauthorized';
+          break;
+        case 403:
+          msg = 'Forbidden';
+          break;
+        case 502:
+          msg = 'Bad Gateway';
+          break;
+        default:
+          msg = errorMsg
+      }
+      that.$.signInForm.querySelector('.output').innerHTML = msg;
+    });
+
+    this.$.signInForm.addEventListener('iron-form-response', event => {
+      that.loading = false;
+      that.$.signInForm.querySelector('.output').innerHTML = 'SUCCESS!';
+      window.location = event.detail.response.redirect;
+    });
+
+    this.$.signInForm.addEventListener('iron-form-presubmit', () => {
+      that.$.signInForm.headers['Csrf-Token'] = this.csrfToken;
+    });
   },
 
   _submitButtonHandler() {
+    // this.set('showRequestWhitelist', false);
     this.loading = true;
-    this.$.setPasswordSubmit.disabled = true;
-    this.$.setPasswordForm.querySelector('.output').innerHTML = '';
-    this.$.setPasswordForm.submit();
+    this.$.signInSubmit.disabled = true;
+    this.$.signInForm.querySelector('.output').innerHTML = '';
+    this.$.signInForm.submit();
   },
 
   _logoClicked() {
-    this.fire('user-action', 'logo click on set-password');
+    this.fire('user-action', 'logo click on sign-in');
+  },
+
+  _autoSelect(event) {
+    event.target._focusableElement.select();
   },
 });
