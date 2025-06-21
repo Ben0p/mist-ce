@@ -29,7 +29,7 @@ import './styles/shared-styles.js';
 import './mist-header/mist-header.js';
 import './mist-sidebar.js';
 import './app-icons/app-icons.js';
-// import './mist-socket.js';
+import './mist-socket.js';
 import './mist-notice.js';
 import './mist-icons.js';
 import './organizations/organization-add.js';
@@ -210,7 +210,6 @@ documentContainer.innerHTML = `<dom-module id="mist-app">
                     <page-insights name="insights" route="{{subroute}}" model="[[model]]" email="[[config.email]]" currency="[[config.features.currency]]" insights-enabled="[[model.org.insights_enabled]]" hidden$="[[!config.features.insights]]"></page-insights>
                 </template>
                 <page-my-account name="my-account" route="{{subroute}}" user="[[model.user]]" org="[[model.org]]" machines="[[model.machines]]" tokens="[[model.tokens]]" sessions="[[model.sessions]]" config="[[config]]"></page-my-account>
-                <page-sign-in name="sign-in"></page-sign-in>
                 <page-not-found name="not-found" route="{{subroute}}"></page-not-found>
             </iron-pages>
             <paper-toast id="mist-toast"></paper-toast>
@@ -669,7 +668,7 @@ Polymer({
     if (this.smallscreen) {
       this.$.sidebar.closeSidebar();
     }
-    if (['index.html'].indexOf(page) > -1)
+    if (['index.html', 'sign-up', 'sign-in'].indexOf(page) > -1)
       page = 'dashboard';
     this.page = page || 'dashboard';
     this.set('visibleSuggestions', false);
@@ -678,11 +677,9 @@ Polymer({
   _pageChanged(page) {
     this.set('count', '');
     this.set('loading', true);
-    // Define pageImport based on the current page.
-    // For instance, if your pages are named like "page-dashboard.js" etc.
-    const pageImport = `./page-${page}.js`;
+    // Load page import on demand. Show 404 page if fails
 
-    import(pageImport).then(this._hideLoader.bind(this), reason => {
+    import(`./page-${page}.js`).then(this._hideLoader.bind(this), reason => {
       console.log('FAILURE!! ', reason);
       this._showPage404();
     });

@@ -2,6 +2,8 @@
   "entrypoint": "index.html",
   "shell": "src/mist-app.js",
   "fragments": [
+    "src/auth/auth-app.js",
+    "src/auth/auth-sign-in.js",
     "src/page-machines.js",
     "src/page-images.js",
     "src/page-keys.js",
@@ -19,7 +21,6 @@
     "src/page-members.js",
     "src/page-insights.js",
     "src/page-not-found.js",
-    "src/page-sign-in.js",
     "src/helpers/card-form.js",
     "src/app-form/app-form.js",
     "src/element-for-in/element-for-in.js"

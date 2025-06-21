@@ -23,31 +23,52 @@
         };
     </script>
     <script tal:condition="features['rbac']" tal:content="structure ugly_rbac"></script>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async tal:condition="google_analytics_id" src="https://www.googletagmanager.com/gtag/js?id=${google_analytics_id}"></script>
-    <script type="module">
-        const dataLayer = window.dataLayer || [];
-        function gtag(...args) { dataLayer.push(args); }
-        gtag('js', new Date());
-        gtag('config', '${google_analytics_id}', { // eslint-disable-line
-            'custom_map': { 'app': 'ui' }
-        });
-        gtag('set', { 'content_group1': 'ui' });
-    </script>
-    <script tal:content="string: const True = true, False = false, CONFIG = {'portal_name': '${portal_name}', 'features': ${structure:features}, 'email': ${email}, 'cta': ${cta}, 'theme': '${theme}'};">
-        const CONFIG = false; // eslint-disable-line no-unused-vars
-    </script>
+
+    <script
+        tal:content="string: const True = true, False = false, CONFIG = {'portal_name': '${portal_name}', 'features': ${structure:features}, 'email': ${email}, 'cta': ${cta}, 'theme': '${theme}'};">
+            const CONFIG = false; // eslint-disable-line no-unused-vars
+        </script>
+    <script tal:condition="csrf_token|nothing" tal:content="string: const CSRF_TOKEN=${csrf_token}"></script>
 </head>
 <body>
-    <mist-app unresolved>
-    </mist-app>
+    <div id="app-container"></div>
     <script type="module">
-    /* eslint-disable no-undef */
-    import './src/mist-app.js';
+        async function loadApp() {
+            try {
+                const response = await fetch('/api/v1/ping', {
+                    method: 'GET',
+                    credentials: 'include', // Ensure cookies are sent with the request
+                });
 
-    if (CONFIG) {
-        document.querySelector('mist-app').config = CONFIG;
-    }
+                if (response.ok) {
+                    const authStatus = await response.json();
+                    const appContainer = document.getElementById('app-container');
+
+                    if (authStatus.authenticated) {
+                        // Load mist-app.js if authenticated
+                        const { default: MistApp } = await import('./src/mist-app.js');
+                        appContainer.innerHTML = '<mist-app unresolved></mist-app>';
+                        if (CONFIG) {
+                            document.querySelector('mist-app').config = CONFIG;
+                        }
+                    } else {
+                        throw new Error('Not authenticated');
+                    }
+                } else {
+                    throw new Error('Not authenticated');
+                }
+            } catch (error) {
+                console.error('Error checking authentication status:', error);
+                // Load landing-app.js if not authenticated
+                const { default: LandingApp } = await import('./src/auth/landing-app.js');
+                document.getElementById('app-container').innerHTML = '<landing-app unresolved></landing-app>';
+
+                document.querySelector('landing-app').csrfToken = CSRF_TOKEN;
+                document.querySelector('landing-app').config = CONFIG;
+            }
+        }
+
+        loadApp();
     </script>
 </body>
 </html>
