@@ -29,8 +29,8 @@ jobs:
       - name: Build and push images
         run: |
           set -e
-          export IMG_REGISTRY="${IMAGE_BASE}"
-          export IMG_TAG="${GITHUB_REF_NAME}"
+          export IMG_REGISTRY=$(echo "ghcr.io/${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          export IMG_TAG="${GITHUB_REF_NAME:-dev}"
           echo "IMG_REGISTRY=$IMG_REGISTRY"
           echo "IMG_TAG=$IMG_TAG"
           export CONF_DIR=/etc/mist
