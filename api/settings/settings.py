@@ -17,7 +17,7 @@ PORTAL_URI = "http://192.168.8.229"
 # }
 
 ## Configure whether to serve bundled/minified UI assets.
-JS_BUILD = True
+JS_BUILD = False
 
 ## Allow mist.io to connect to localhost.
 # ALLOW_CONNECT_LOCALHOST = True

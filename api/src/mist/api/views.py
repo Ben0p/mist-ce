@@ -101,15 +101,6 @@ def get_ui_template(build_path=''):
     get_file(template_url + build_path, 'templates/ui.pt')
 
 
-def get_landing_template(build_path=''):
-    if build_path and build_path[0] != '/':
-        build_path = '/' + build_path
-        template_url = config.LANDING_TEMPLATE_URL
-    else:
-        template_url = config.LANDING_TEMPLATE_URL + ':8000'
-    get_file(template_url + build_path, 'templates/landing.pt')
-
-
 @view_config(context=Exception)
 def exception_handler_mist(exc, request):
     """
@@ -175,10 +166,14 @@ def home(request):
                                     backend=external_auth)
             raise RedirectError(url)
 
-        get_landing_template(build_path)
         page = request.path.strip('/').replace('.', '')
         if not page:
             page = 'home'
+        if page == 'sign-in':
+            get_ui_template(build_path)
+            template_inputs['ugly_rbac'] = config.UGLY_RBAC
+            return render_to_response('templates/ui.pt', template_inputs)
+
         if page not in config.LANDING_FORMS:
             if 'blog' in page:
                 uri_prefix = config.BLOG_CDN_URI or \
@@ -230,7 +225,7 @@ def home(request):
             except Exception as exc:
                 log.error("Failed to fetch page `%s` from `%s`: %r" % (
                     page, page_uri, exc))
-        return render_to_response('templates/landing.pt', template_inputs)
+        return render_to_response('templates/ui.pt', template_inputs)
 
     if not user.last_active or \
             datetime.now() - user.last_active > timedelta(0, 300):
@@ -270,12 +265,19 @@ def not_found(request):
                                     backend=external_auth)
             raise RedirectError(url)
 
-        get_landing_template(build_path)
-        return render_to_response('templates/landing.pt', template_inputs,
+        get_ui_template(build_path)
+        return render_to_response('templates/ui.pt', template_inputs,
                                   request=request,
                                   response=request.response)
 
-    get_ui_template(build_path)
+        page = request.path.strip('/').replace('.', '')
+        if page == 'sign-in':
+            get_ui_template(build_path)
+            template_inputs['ugly_rbac'] = config.UGLY_RBAC
+            return render_to_response('templates/ui.pt', template_inputs,
+                                      request=request,
+                                      response=request.response)
+
     template_inputs['ugly_rbac'] = config.UGLY_RBAC
     return render_to_response('templates/ui.pt', template_inputs,
                               request=request,
@@ -823,8 +825,8 @@ def reset_password(request):
         template_inputs['build_path'] = build_path
         template_inputs['csrf_token'] = json.dumps(get_csrf_token(request))
 
-        get_landing_template(build_path)
-        return render_to_response('templates/landing.pt', template_inputs)
+        get_ui_template(build_path)
+        return render_to_response('templates/ui.pt', template_inputs)
     elif request.method == 'POST':
 
         password = params.get('password', '')
@@ -976,8 +978,8 @@ def set_password(request):
         template_inputs['build_path'] = build_path
         template_inputs['csrf_token'] = json.dumps(get_csrf_token(request))
 
-        get_landing_template(build_path)
-        return render_to_response('templates/landing.pt', template_inputs)
+        get_ui_template(build_path)
+        return render_to_response('templates/ui.pt', template_inputs)
     elif request.method == 'POST':
         password = params.get('password', '')
         if not password:
@@ -1336,19 +1338,21 @@ def probe(request):
     return ret
 
 
-@view_config(route_name='api_v1_ping', request_method=('GET', 'POST'),
-             renderer='json')
+@view_config(route_name='api_v1_ping', request_method=('GET', 'POST'), renderer='json')
 def ping(request):
     """
-    Tags: api_tokens
-    ---
-    Check that an api token is correct.
-    ---
+    Check if the user is authenticated using either an API token or a session token.
     """
     user = user_from_request(request)
-    if isinstance(session_from_request(request), SessionToken):
-        raise BadRequestError('This call is for users with api tokens')
-    return {'hello': user.email}
+    session = session_from_request(request)
+    
+    # Allow both SessionToken and ApiToken
+    if isinstance(session, SessionToken):
+        return {'authenticated': True, 'email': user.email, 'session': True}
+    elif isinstance(session, ApiToken):
+        return {'authenticated': True, 'email': user.email, 'api_token': True}
+    else:
+        raise BadRequestError('Invalid session or token')
 
 
 @view_config(route_name='api_v1_providers', request_method='GET',
