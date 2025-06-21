@@ -1,0 +1,66 @@
+name: Staging
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+env:
+  IMAGE_BASE: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  build:
+    name: Build images from branch
+    runs-on: ubuntu-latest
+    env:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+    steps:
+      - name: Checkout code (with submodules)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Log in to GitHub Container Registry
+        run: |
+          if [[ -z "$GHCR_TOKEN" ]]; then
+            export GHCR_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          fi
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+      - name: Build and push images
+        run: |
+          set -e
+          export IMG_REGISTRY="${IMAGE_BASE}"
+          export IMG_TAG="${GITHUB_REF_NAME}"
+          echo "IMG_REGISTRY=$IMG_REGISTRY"
+          echo "IMG_TAG=$IMG_TAG"
+          export CONF_DIR=/etc/mist
+
+          docker compose build
+          docker compose push
+
+  compose:
+    name: Generate Compose File
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install gettext for envsubst
+        run: sudo apt-get update && sudo apt-get install -y gettext
+
+      - name: Generate docker-compose.yml
+        run: |
+          set -e
+          mkdir -p artifacts
+          export IMG_REGISTRY="${IMAGE_BASE}"
+          export IMG_TAG="${GITHUB_REF_NAME}"
+          export CONF_DIR=/etc/mist
+          envsubst < docker-compose.yml > artifacts/docker-compose.yml
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-compose
+          path: artifacts/docker-compose.yml
