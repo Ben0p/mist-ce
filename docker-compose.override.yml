@@ -62,10 +62,6 @@ services:
     ports:
       - 8000
 
-  landing:
-    build: ./landing
-    volumes:
-      - ./landing:/landing:rw
   nginx:
     build: ./docker/nginx
     volumes:

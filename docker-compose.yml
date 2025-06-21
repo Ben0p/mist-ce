@@ -143,16 +143,6 @@ services:
     expose:
       - 80
 
-  landing:
-    image: $IMG_REGISTRY/landing:$IMG_TAG
-    platform: linux/x86_64
-    command: sh /entry.sh
-    stdin_open: true
-    tty: true
-    restart: on-failure:5
-    expose:
-      - 80
-
   nginx:
     image: $IMG_REGISTRY/nginx:$IMG_TAG
     platform: linux/x86_64
